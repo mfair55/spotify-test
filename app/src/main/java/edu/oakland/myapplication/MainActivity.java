@@ -21,7 +21,14 @@ import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 
 import kaaes.spotify.webapi.android.SpotifyApi;
+import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.TracksPager;
+
+import edu.oakland.myapplication.util.SharedPref;
+import kaaes.spotify.webapi.android.models.UserPrivate;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 
 public class MainActivity extends Activity implements
         SpotifyPlayer.NotificationCallback, ConnectionStateCallback
@@ -30,7 +37,10 @@ public class MainActivity extends Activity implements
     private Button playButton, pauseButton, searchButton;
     public TextView status;
     private EditText trackSearch;
+    private SearchActivity search;
 
+    private String spotifyClientId = "";
+    private String spotifyClientToken = "";
 
     // TODO: Replace with your client ID
     private static final String CLIENT_ID = "6ebb0c251b6742dbbac3df964d636ea2";
@@ -43,7 +53,9 @@ public class MainActivity extends Activity implements
 
     private Player mPlayer;
     private SpotifyApi api = new SpotifyApi();
-    private String searchedTrack;
+    private SpotifyService apiService = api.getService();
+    private String result = "";
+    private String resultUri = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,43 +72,27 @@ public class MainActivity extends Activity implements
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
 
         searchButton = (Button) findViewById(R.id.searchButton);
+        EditText trackSearch = (EditText) findViewById(R.id.trackSearch);
+        final String searchVariable = trackSearch.getText().toString();
         searchButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                String content = "Easy Go";
-
-                searchedTrack = api.getService().searchTracks(content).tracks.items.get(0).uri;
-                status = (TextView) findViewById(R.id.trackTitle);
-                status.setText(searchedTrack);
-
+                SearchTrackString("T-Pain Mashup");
             }
         });
-
-
-
-
-
 
         playButton = (Button) findViewById(R.id.playButton);
         playButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-
                 //startActivity(new Intent(MainActivity.this, LoginActivity.class));
 
-                /*
-                status = (TextView) findViewById(R.id.trackTitle);
-                status.setText("Song Name: " + mPlayer.getMetadata().currentTrack.name);
-                status = (TextView) findViewById(R.id.trackArtist);
-                status.setText("Song Artist: " + mPlayer.getMetadata().currentTrack.artistName);
-                */
 
-                if(!mPlayer.getPlaybackState().isPlaying)
+                if(mPlayer.getPlaybackState().positionMs <= 0) {
+                    mPlayer.playUri(null, resultUri, 0, 0);
+                }
+                else
                     mPlayer.resume(mOperationCallback);
 
-
             }
-
-
-
         });
 
         pauseButton = (Button) findViewById(R.id.pauseButton);
@@ -107,6 +103,8 @@ public class MainActivity extends Activity implements
             }
         });
     }
+
+
 
     private final Player.OperationCallback mOperationCallback = new Player.OperationCallback() {
         @Override
@@ -127,7 +125,12 @@ public class MainActivity extends Activity implements
         if (requestCode == REQUEST_CODE) {
             AuthenticationResponse response = AuthenticationClient.getResponse(resultCode, intent);
             if (response.getType() == AuthenticationResponse.Type.TOKEN) {
-                api.setAccessToken(response.getAccessToken());
+
+
+                spotifyClientToken = response.getAccessToken();
+
+
+                api.setAccessToken(spotifyClientToken);
                 Config playerConfig = new Config(this, response.getAccessToken(), CLIENT_ID);
                 Spotify.getPlayer(playerConfig, this, new SpotifyPlayer.InitializationObserver() {
                     @Override
@@ -143,7 +146,36 @@ public class MainActivity extends Activity implements
                     }
                 });
             }
+
+            SpotifyService spotifyService = api.getService();
+
+            spotifyService.getMe(new Callback<UserPrivate>(){
+                @Override
+                public void success(UserPrivate userPrivate, Response response){
+                    spotifyClientId = userPrivate.id;
+                }
+                @Override
+                public void failure(RetrofitError error){
+
+                }
+            });
+
         }
+    }
+
+    public void SearchTrackString(String trackName){
+        apiService.searchTracks(trackName, new Callback<TracksPager>(){
+            @Override
+            public void success(TracksPager tracksPager, Response response){
+                result = tracksPager.tracks.items.get(0).toString();
+                resultUri = tracksPager.tracks.items.get(0).uri;
+            }
+
+            @Override
+            public void failure(RetrofitError error){
+
+            }
+        });
     }
 
     @Override
@@ -177,7 +209,7 @@ public class MainActivity extends Activity implements
     public void onLoggedIn() {
         Log.d("MainActivity", "User logged in");
 
-        mPlayer.playUri(null, "spotify:track:0FOPDqF7FBZwHITfKHMvLK", 0, 0);
+        //mPlayer.playUri(null, resultUri, 0, 0);
 
     }
 
