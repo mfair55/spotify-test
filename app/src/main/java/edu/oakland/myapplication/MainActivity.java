@@ -76,7 +76,7 @@ public class MainActivity extends Activity implements
         final String searchVariable = trackSearch.getText().toString();
         searchButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                SearchTrackString("T-Pain Mashup");
+                SearchTrackString("T-Pain");
             }
         });
 
