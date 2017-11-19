@@ -9,7 +9,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 
-public class SharedPref {
+public class SharedPreferenceHelper {
 
     public static final String PREFERENCES = "SpotifyPreferences";
 
@@ -19,7 +19,7 @@ public class SharedPref {
     private Context mContext;
     private SharedPreferences mSharedPreferences;
 
-    public SharedPref(Context context){
+    public SharedPreferenceHelper(Context context){
         mContext = context;
         mSharedPreferences = mContext.getSharedPreferences(PREFERENCES, 0);
     }

@@ -1,14 +1,11 @@
-package edu.oakland.myapplication;
+package edu.oakland.myapplication.activity;
 
 /**
  * Created by Matthew Fair on 11/12/2017.
  */
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.util.Log;
 
 
-import edu.oakland.myapplication.util.SharedPref;
+import edu.oakland.myapplication.util.SharedPreferenceHelper;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.TracksPager;
@@ -19,7 +16,7 @@ import retrofit.client.Response;
 
 public class SearchActivity {
     private final SpotifyService mSpotifyService;
-    private SharedPref mSharedPreferences;
+    private SharedPreferenceHelper mSharedPreferences;
     private String result;
     private String resultUri;
 

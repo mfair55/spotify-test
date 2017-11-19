@@ -1,6 +1,7 @@
-package edu.oakland.myapplication;
+package edu.oakland.myapplication.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,11 +21,13 @@ import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 
+import edu.oakland.myapplication.R;
+import edu.oakland.myapplication.controllers.SearchTrackController;
+import edu.oakland.myapplication.screen_actions.SearchTrackURI;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.TracksPager;
 
-import edu.oakland.myapplication.util.SharedPref;
 import kaaes.spotify.webapi.android.models.UserPrivate;
 import retrofit.Callback;
 import retrofit.RetrofitError;
@@ -54,7 +57,7 @@ public class MainActivity extends Activity implements
     private Player mPlayer;
     private SpotifyApi api = new SpotifyApi();
     private SpotifyService apiService = api.getService();
-    private String result = "";
+    private String userID,result;
     private String resultUri = "";
 
     @Override
@@ -62,12 +65,14 @@ public class MainActivity extends Activity implements
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-
+//AuthenticationResponse response = AuthenticationClient.getResponse
         AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
                 AuthenticationResponse.Type.TOKEN,
                 REDIRECT_URI);
         builder.setScopes(new String[]{"user-read-private", "streaming"});
         final AuthenticationRequest request = builder.build();
+
+
 
         AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
 
@@ -76,7 +81,27 @@ public class MainActivity extends Activity implements
         final String searchVariable = trackSearch.getText().toString();
         searchButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                SearchTrackString("T-Pain");
+                //SearchTrackURI searchTrackURI = new SearchTrackURI();
+
+                //SearchTrackController searchTrack = new SearchTrackController();
+                //searchTrack.searchURI("Home (with Machine Gun Kelly");
+
+                //resultUri = searchTrack.getTrackURI();
+                apiService.getMe(new Callback<UserPrivate>(){
+                    @Override
+                    public void success(UserPrivate userPrivate, Response response) {
+                        userID = userPrivate.id;
+                    }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+                        Log.d("", "FAILED to Obtain User Information.");
+                    }
+                });
+                status = (TextView) findViewById(R.id.status);
+                status.setText();
+
+                SearchTrackString("Home (with Machine Gun Kelly");
             }
         });
 
@@ -103,7 +128,6 @@ public class MainActivity extends Activity implements
             }
         });
     }
-
 
 
     private final Player.OperationCallback mOperationCallback = new Player.OperationCallback() {
