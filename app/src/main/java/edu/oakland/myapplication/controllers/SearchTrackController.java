@@ -2,8 +2,8 @@ package edu.oakland.myapplication.controllers;
 
 import android.content.Context;
 
-import edu.oakland.myapplication.screen_actions.SearchTrackURI;
-import edu.oakland.myapplication.util.SharedPreferenceHelper;
+import edu.oakland.myapplication.util.SearchResults;
+import edu.oakland.myapplication.util.Settings;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.TracksPager;
@@ -17,49 +17,40 @@ import retrofit.client.Response;
 
 public class SearchTrackController {
 
-    private static final String TAG = SearchTrackController.class.getSimpleName();
-    private final SharedPreferenceHelper mSharedPreferenceHelper;
-    private final SearchTrackURI mSearchTrackURI;
-    private final SpotifyService mSpotifyService;
+    private static String resultUri;
+    private SpotifyService apiService;
+    private Settings savedSettings;
+    private SearchResults searchResults;
 
-    private String returnTrackURI = "";
 
-    public SearchTrackController(SearchTrackURI searchTrackActivity){
-        mSearchTrackURI = searchTrackActivity;
-        mSharedPreferenceHelper = new SharedPreferenceHelper((Context) searchTrackActivity);
-
-        SpotifyApi api = new SpotifyApi();
-        api.setAccessToken(mSharedPreferenceHelper.getCurrentSpotifyToken());
-        mSpotifyService = api.getService();
+    public SearchTrackController(Settings s, SearchResults newResults){
+        savedSettings = s;
+        searchResults = newResults;
+        SpotifyApi api  = new SpotifyApi();
+        api.setAccessToken(savedSettings.getAccessToken());
+        apiService = api.getService();
     }
 
-    public void searchURI(String trackName){
-        mSpotifyService.searchTracks(trackName, new Callback<TracksPager>(){
-            String trackURI;
+    public void SearchTrack(String trackName) {
+
+        apiService.searchTracks(trackName, new Callback<TracksPager>(){
             @Override
             public void success(TracksPager tracksPager, Response response){
-               setTrackURI(tracksPager.tracks.items.get(0).uri);
-
-                //mSearchTrackURI.setTrackURI(tracksPager.tracks.items.get(0).uri);
-            }
-            public void failure(RetrofitError error) {
-
+                searchResults.SetUri(tracksPager.tracks.items.get(0).uri);
             }
 
+            @Override
+            public void failure(RetrofitError error){
+
+            }
         });
-
     }
 
-    public void setTrackURI(String newURI){
-        returnTrackURI = newURI;
+    public String getResultUri(){
+        return resultUri;
     }
 
-    public String getTrackURI(){
-        if(returnTrackURI != "")
-            return returnTrackURI;
-        else
-            return "";
-    }
+
 
 
 

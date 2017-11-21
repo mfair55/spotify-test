@@ -21,9 +21,16 @@ import com.spotify.sdk.android.player.PlayerEvent;
 import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+
 import edu.oakland.myapplication.R;
 import edu.oakland.myapplication.controllers.SearchTrackController;
 import edu.oakland.myapplication.screen_actions.SearchTrackURI;
+import edu.oakland.myapplication.util.SearchResults;
+import edu.oakland.myapplication.util.Settings;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
 import kaaes.spotify.webapi.android.models.TracksPager;
@@ -45,9 +52,16 @@ public class MainActivity extends Activity implements
     private String spotifyClientId = "";
     private String spotifyClientToken = "";
 
-    // TODO: Replace with your client ID
+
+    private static final String FILE_NAME = "Settings.dat";
+    private File file;
+
+
+
+
+
+
     private static final String CLIENT_ID = "6ebb0c251b6742dbbac3df964d636ea2";
-    // TODO: Replace with your redirect URI
     private static final String REDIRECT_URI = "myapp-spotifylogin://callback";
 
     // Request code that will be used to verify if the result comes from correct activity
@@ -59,58 +73,48 @@ public class MainActivity extends Activity implements
     private SpotifyService apiService = api.getService();
     private String userID,result;
     private String resultUri = "";
+    private Settings s;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
-//AuthenticationResponse response = AuthenticationClient.getResponse
-        AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID,
-                AuthenticationResponse.Type.TOKEN,
-                REDIRECT_URI);
-        builder.setScopes(new String[]{"user-read-private", "streaming"});
-        final AuthenticationRequest request = builder.build();
+        s = new Settings("default","value");
+
+        file = new File(getFilesDir(), FILE_NAME);
 
 
 
-        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
+            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
+            builder.setScopes(new String[]{"user-read-private", "streaming"});
+            final AuthenticationRequest request = builder.build();
+
+
+            AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
 
         searchButton = (Button) findViewById(R.id.searchButton);
         EditText trackSearch = (EditText) findViewById(R.id.trackSearch);
         final String searchVariable = trackSearch.getText().toString();
         searchButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                //SearchTrackURI searchTrackURI = new SearchTrackURI();
-
-                //SearchTrackController searchTrack = new SearchTrackController();
-                //searchTrack.searchURI("Home (with Machine Gun Kelly");
-
-                //resultUri = searchTrack.getTrackURI();
-                apiService.getMe(new Callback<UserPrivate>(){
-                    @Override
-                    public void success(UserPrivate userPrivate, Response response) {
-                        userID = userPrivate.id;
-                    }
-
-                    @Override
-                    public void failure(RetrofitError error) {
-                        Log.d("", "FAILED to Obtain User Information.");
-                    }
-                });
                 status = (TextView) findViewById(R.id.status);
-                status.setText();
-
-                SearchTrackString("Home (with Machine Gun Kelly");
+                status.setText("");
+                try{
+                    s = s.getSettings(file);
+                } catch (Exception e){
+                    e.printStackTrace();
+                }
+                SearchResults searchResults = new SearchResults();
+                SearchTrackController stc = new SearchTrackController(s, searchResults);
+                stc.SearchTrack("Home (with Machine Gun Kelly");
+                resultUri = searchResults.getUri();
+                //SearchTrackString("Home (with Machine Gun Kelly");
             }
         });
 
         playButton = (Button) findViewById(R.id.playButton);
         playButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                //startActivity(new Intent(MainActivity.this, LoginActivity.class));
-
-
                 if(mPlayer.getPlaybackState().positionMs <= 0) {
                     mPlayer.playUri(null, resultUri, 0, 0);
                 }
@@ -133,12 +137,12 @@ public class MainActivity extends Activity implements
     private final Player.OperationCallback mOperationCallback = new Player.OperationCallback() {
         @Override
         public void onSuccess() {
-            //logStatus("OK!");
+
         }
 
         @Override
         public void onError(Error error) {
-            //logStatus("ERROR:" + error);
+
         }
     };
     @Override
@@ -180,18 +184,21 @@ public class MainActivity extends Activity implements
                 }
                 @Override
                 public void failure(RetrofitError error){
-
+                    spotifyClientId = "Error";
                 }
             });
 
+            Settings s = new Settings(spotifyClientToken, spotifyClientId);
+            s.saveSettings(s, file);
+
         }
     }
+
 
     public void SearchTrackString(String trackName){
         apiService.searchTracks(trackName, new Callback<TracksPager>(){
             @Override
             public void success(TracksPager tracksPager, Response response){
-                result = tracksPager.tracks.items.get(0).toString();
                 resultUri = tracksPager.tracks.items.get(0).uri;
             }
 
@@ -201,6 +208,8 @@ public class MainActivity extends Activity implements
             }
         });
     }
+
+
 
     @Override
     protected void onDestroy() {
@@ -214,8 +223,7 @@ public class MainActivity extends Activity implements
         Log.d("MainActivity", "Playback event received: " + playerEvent.name());
         switch (playerEvent) {
             // Handle event type as necessary
-            default:
-                break;
+            default:                break;
         }
     }
 
