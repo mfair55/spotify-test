@@ -16,7 +16,7 @@ import retrofit.client.Response;
 
 public class SearchTrackController {
 
-    private static String resultUri;
+    private static String resultUri, artistName;
     private SpotifyService apiService;
     private Settings savedSettings;
     private File file;
@@ -29,6 +29,30 @@ public class SearchTrackController {
         api.setAccessToken(savedSettings.getAccessToken());
         apiService = api.getService();
         file = newFile;
+    }
+
+    public void SearchTrack(String trackName, final String newArtistName) {
+        apiService.searchTracks(trackName, new Callback<TracksPager>(){
+            @Override
+            public void success(TracksPager tracksPager, Response response){
+                String artist;
+                for(int i = 0; i < tracksPager.tracks.items.size(); i++ ) {
+                    artist = tracksPager.tracks.items.get(i).artists.get(0).name.toLowerCase();
+                    if(artist.equals(newArtistName.toLowerCase())) {
+                        savedSettings.setTrackName(tracksPager.tracks.items.get(i).name);
+                        savedSettings.setTrackArtist(tracksPager.tracks.items.get(i).artists.get(0).name);
+                        savedSettings.setUriResult(tracksPager.tracks.items.get(i).uri);
+                        savedSettings.saveSettings(savedSettings, file);
+                        break;
+                    }
+                }
+            }
+
+            @Override
+            public void failure(RetrofitError error){
+
+            }
+        });
     }
 
     public void SearchTrack(String trackName) {

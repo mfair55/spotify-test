@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/MyApplication.iml" filepath="$PROJECT_DIR$/MyApplication.iml" />
+      <module fileurl="file://C:\Users\Matthew Fair\.AndroidStudio3.0\Projects\spotify-test\MyApplication.iml" filepath="C:\Users\Matthew Fair\.AndroidStudio3.0\Projects\spotify-test\MyApplication.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/spotify-test.iml" filepath="$PROJECT_DIR$/spotify-test.iml" />
     </modules>
   </component>
 </project>

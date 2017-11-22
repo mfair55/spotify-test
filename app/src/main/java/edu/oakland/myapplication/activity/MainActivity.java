@@ -47,7 +47,7 @@ public class MainActivity extends Activity implements
 
     private Button playButton, pauseButton, searchButton, resumeButton;
     public TextView title, artist;
-    private EditText trackSearch;
+    private EditText trackSearch, artistSearch;
 
     private String spotifyClientToken;
     private Player mPlayer;
@@ -71,11 +71,12 @@ public class MainActivity extends Activity implements
 
         searchButton = (Button) findViewById(R.id.searchButton);
         trackSearch = (EditText) findViewById(R.id.trackSearch);
+        artistSearch = (EditText) findViewById(R.id.editText2);
         searchButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 s = s.getSettings(file);
                 SearchTrackController stc = new SearchTrackController(s, file);
-                stc.SearchTrack(trackSearch.getText().toString());
+                stc.SearchTrack(trackSearch.getText().toString(), artistSearch.getText().toString());
             }
         });
 
