@@ -19,11 +19,10 @@ import edu.oakland.myapplication.activity.MainActivity;
 
 public class Settings implements Serializable {
 
-    private String accessToken, userID;
+    private String accessToken, userID, uriResult, trackName, trackArtist;
 
-    public Settings(String accessToken, String userID){
+    public Settings(String accessToken){
         setAccessToken(accessToken);
-        setUserID(userID);
     }
 
     public Settings(){
@@ -39,6 +38,28 @@ public class Settings implements Serializable {
         userID = newUserID;
     }
 
+    public void setUriResult(String newUri){
+        uriResult = newUri;
+    }
+
+    public void setTrackName(String newTrackName){
+        trackName = newTrackName;
+    }
+    public void setTrackArtist(String newArtist){
+        trackArtist = newArtist;
+    }
+
+    public String getTrackArtist(){
+        return trackArtist;
+    }
+
+    public String getTrackName(){
+        return trackName;
+    }
+
+    public String getUriResult(){
+        return uriResult;
+    }
     public String getAccessToken(){
         return accessToken;
     }

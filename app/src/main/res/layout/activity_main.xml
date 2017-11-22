@@ -8,80 +8,88 @@
     tools:layout_editor_absoluteY="81dp">
 
     <TextView
-        android:id="@+id/status"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="100dp"
+        android:id="@+id/artistName"
+        android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_marginBottom="240dp"
+        android:layout_marginEnd="16dp"
         android:text="Artist Name"
-        app:layout_constraintBottom_toBottomOf="@+id/trackTitle"
-        app:layout_constraintStart_toStartOf="@+id/trackTitle"
-        app:layout_constraintTop_toTopOf="@+id/trackTitle" />
+        app:layout_constraintBottom_toTopOf="@+id/resumeButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/trackTitle"
+        app:layout_constraintTop_toBottomOf="@+id/trackSearch"
+        android:layout_marginRight="16dp" />
 
     <TextView
         android:id="@+id/trackTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="416dp"
+        android:layout_width="0dp"
+        android:layout_height="31dp"
+        android:layout_marginStart="8dp"
         android:text="Track Name"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.355"
+        app:layout_constraintBaseline_toBaselineOf="@+id/artistName"
+        app:layout_constraintEnd_toStartOf="@+id/artistName"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:layout_marginLeft="8dp" />
 
     <Button
         android:id="@+id/playButton"
-        android:layout_width="166dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:text="Play"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/pauseButton"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintBottom_toTopOf="@+id/artistName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/searchButton" />
 
     <Button
         android:id="@+id/pauseButton"
-        android:layout_width="180dp"
+        android:layout_width="190dp"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
         android:text="Pause"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBaseline_toBaselineOf="@+id/resumeButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/playButton" />
-
-    <EditText
-        android:id="@+id/artistSearch"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="2dp"
-        android:layout_marginTop="39dp"
-        android:ems="10"
-        android:inputType="textPersonName"
-        android:text="Artist Name"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@+id/resumeButton" />
 
     <EditText
         android:id="@+id/trackSearch"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:ems="10"
+        android:layout_marginBottom="96dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:ems="15"
         android:inputType="textPersonName"
         android:text="Track Name"
-        app:layout_constraintStart_toStartOf="@+id/artistSearch"
-        app:layout_constraintTop_toBottomOf="@+id/artistSearch" />
+        app:layout_constraintBottom_toTopOf="@+id/artistName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/searchButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
         android:text="Search"
-        app:layout_constraintEnd_toEndOf="@+id/trackSearch"
-        app:layout_constraintStart_toStartOf="@+id/trackSearch"
+        app:layout_constraintBottom_toTopOf="@+id/playButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/trackSearch" />
+
+    <Button
+        android:id="@+id/resumeButton"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:text="Resume"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/pauseButton"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/artistName" />
 
 </android.support.constraint.ConstraintLayout>

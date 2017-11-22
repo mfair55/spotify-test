@@ -1,8 +1,7 @@
 package edu.oakland.myapplication.controllers;
 
-import android.content.Context;
+import java.io.File;
 
-import edu.oakland.myapplication.util.SearchResults;
 import edu.oakland.myapplication.util.Settings;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -20,15 +19,16 @@ public class SearchTrackController {
     private static String resultUri;
     private SpotifyService apiService;
     private Settings savedSettings;
-    private SearchResults searchResults;
+    private File file;
 
 
-    public SearchTrackController(Settings s, SearchResults newResults){
+
+    public SearchTrackController(Settings s, File newFile){
         savedSettings = s;
-        searchResults = newResults;
         SpotifyApi api  = new SpotifyApi();
         api.setAccessToken(savedSettings.getAccessToken());
         apiService = api.getService();
+        file = newFile;
     }
 
     public void SearchTrack(String trackName) {
@@ -36,7 +36,10 @@ public class SearchTrackController {
         apiService.searchTracks(trackName, new Callback<TracksPager>(){
             @Override
             public void success(TracksPager tracksPager, Response response){
-                searchResults.SetUri(tracksPager.tracks.items.get(0).uri);
+                savedSettings.setTrackName(tracksPager.tracks.items.get(0).name);
+                savedSettings.setTrackArtist(tracksPager.tracks.items.get(0).artists.get(0).name);
+                savedSettings.setUriResult(tracksPager.tracks.items.get(0).uri);
+                savedSettings.saveSettings(savedSettings, file);
             }
 
             @Override

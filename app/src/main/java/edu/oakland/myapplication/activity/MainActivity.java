@@ -1,7 +1,6 @@
 package edu.oakland.myapplication.activity;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,14 +21,9 @@ import com.spotify.sdk.android.player.Spotify;
 import com.spotify.sdk.android.player.SpotifyPlayer;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
 
 import edu.oakland.myapplication.R;
 import edu.oakland.myapplication.controllers.SearchTrackController;
-import edu.oakland.myapplication.screen_actions.SearchTrackURI;
-import edu.oakland.myapplication.util.SearchResults;
 import edu.oakland.myapplication.util.Settings;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
@@ -43,86 +37,72 @@ import retrofit.client.Response;
 public class MainActivity extends Activity implements
         SpotifyPlayer.NotificationCallback, ConnectionStateCallback
 {
-
-    private Button playButton, pauseButton, searchButton;
-    public TextView status;
-    private EditText trackSearch;
-    private SearchActivity search;
-
-    private String spotifyClientId = "";
-    private String spotifyClientToken = "";
-
-
-    private static final String FILE_NAME = "Settings.dat";
-    private File file;
-
-
-
-
-
-
     private static final String CLIENT_ID = "6ebb0c251b6742dbbac3df964d636ea2";
     private static final String REDIRECT_URI = "myapp-spotifylogin://callback";
-
-    // Request code that will be used to verify if the result comes from correct activity
-    // Can be any integer
     private static final int REQUEST_CODE = 1337;
+    private static final String FILE_NAME = "Settings.dat";
+    private static final String PLAYLIST_NAME = "Wabam";
 
+
+
+    private Button playButton, pauseButton, searchButton, resumeButton;
+    public TextView title, artist;
+    private EditText trackSearch;
+
+    private String spotifyClientToken;
     private Player mPlayer;
     private SpotifyApi api = new SpotifyApi();
     private SpotifyService apiService = api.getService();
-    private String userID,result;
-    private String resultUri = "";
+
     private Settings s;
+    private File file;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        s = new Settings("default","value");
 
         file = new File(getFilesDir(), FILE_NAME);
-
-
 
             AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
             builder.setScopes(new String[]{"user-read-private", "streaming"});
             final AuthenticationRequest request = builder.build();
-
-
             AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
 
         searchButton = (Button) findViewById(R.id.searchButton);
-        EditText trackSearch = (EditText) findViewById(R.id.trackSearch);
-        final String searchVariable = trackSearch.getText().toString();
+        trackSearch = (EditText) findViewById(R.id.trackSearch);
         searchButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
-                status = (TextView) findViewById(R.id.status);
-                status.setText("");
-                try{
-                    s = s.getSettings(file);
-                } catch (Exception e){
-                    e.printStackTrace();
-                }
-                SearchResults searchResults = new SearchResults();
-                SearchTrackController stc = new SearchTrackController(s, searchResults);
-                stc.SearchTrack("Home (with Machine Gun Kelly");
-                resultUri = searchResults.getUri();
-                //SearchTrackString("Home (with Machine Gun Kelly");
+                s = s.getSettings(file);
+                SearchTrackController stc = new SearchTrackController(s, file);
+                stc.SearchTrack(trackSearch.getText().toString());
             }
         });
 
         playButton = (Button) findViewById(R.id.playButton);
         playButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                if(mPlayer.getPlaybackState().positionMs <= 0) {
-                    mPlayer.playUri(null, resultUri, 0, 0);
-                }
-                else
-                    mPlayer.resume(mOperationCallback);
+                s = s.getSettings(file); //Reload file in case search changed.
 
+                title = (TextView) findViewById(R.id.trackTitle);
+                title.setText(s.getTrackName());
+
+                artist = (TextView) findViewById(R.id.artistName);
+                artist.setText(s.getTrackArtist());
+
+                mPlayer.playUri(null, s.getUriResult(), 0, 0);
             }
         });
+
+        resumeButton = (Button) findViewById(R.id.resumeButton);
+        resumeButton.setOnClickListener(new View.OnClickListener(){
+            public void onClick(View view){
+                if(!mPlayer.getPlaybackState().isPlaying) {
+                    mPlayer.resume(mOperationCallback);
+                }
+            }
+        });
+
 
         pauseButton = (Button) findViewById(R.id.pauseButton);
         pauseButton.setOnClickListener(new View.OnClickListener() {
@@ -156,7 +136,7 @@ public class MainActivity extends Activity implements
 
 
                 spotifyClientToken = response.getAccessToken();
-
+                s = new Settings(spotifyClientToken);
 
                 api.setAccessToken(spotifyClientToken);
                 Config playerConfig = new Config(this, response.getAccessToken(), CLIENT_ID);
@@ -175,41 +155,22 @@ public class MainActivity extends Activity implements
                 });
             }
 
-            SpotifyService spotifyService = api.getService();
 
-            spotifyService.getMe(new Callback<UserPrivate>(){
+            apiService.getMe(new Callback<UserPrivate>(){
                 @Override
                 public void success(UserPrivate userPrivate, Response response){
-                    spotifyClientId = userPrivate.id;
+                    s.setUserID(userPrivate.id);
+                    s.saveSettings(s, file);
                 }
                 @Override
                 public void failure(RetrofitError error){
-                    spotifyClientId = "Error";
+
                 }
             });
 
-            Settings s = new Settings(spotifyClientToken, spotifyClientId);
             s.saveSettings(s, file);
-
         }
     }
-
-
-    public void SearchTrackString(String trackName){
-        apiService.searchTracks(trackName, new Callback<TracksPager>(){
-            @Override
-            public void success(TracksPager tracksPager, Response response){
-                resultUri = tracksPager.tracks.items.get(0).uri;
-            }
-
-            @Override
-            public void failure(RetrofitError error){
-
-            }
-        });
-    }
-
-
 
     @Override
     protected void onDestroy() {
