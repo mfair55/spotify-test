@@ -37,18 +37,19 @@ import retrofit.client.Response;
 public class MainActivity extends Activity implements
         SpotifyPlayer.NotificationCallback, ConnectionStateCallback
 {
+    //Static variables
     private static final String CLIENT_ID = "6ebb0c251b6742dbbac3df964d636ea2";
     private static final String REDIRECT_URI = "myapp-spotifylogin://callback";
     private static final int REQUEST_CODE = 1337;
     private static final String FILE_NAME = "Settings.dat";
     private static final String PLAYLIST_NAME = "Wabam";
 
-
-
+    //UI variables
     private Button playButton, pauseButton, searchButton, resumeButton;
     public TextView title, artist;
     private EditText trackSearch, artistSearch;
 
+    //Spotify API Variables
     private String spotifyClientToken;
     private Player mPlayer;
     private SpotifyApi api = new SpotifyApi();
