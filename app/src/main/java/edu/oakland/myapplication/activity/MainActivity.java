@@ -23,10 +23,14 @@ import com.spotify.sdk.android.player.SpotifyPlayer;
 import java.io.File;
 
 import edu.oakland.myapplication.R;
+import edu.oakland.myapplication.controllers.PlaylistController;
 import edu.oakland.myapplication.controllers.SearchTrackController;
 import edu.oakland.myapplication.util.Settings;
 import kaaes.spotify.webapi.android.SpotifyApi;
 import kaaes.spotify.webapi.android.SpotifyService;
+import kaaes.spotify.webapi.android.models.Pager;
+import kaaes.spotify.webapi.android.models.PlaylistSimple;
+import kaaes.spotify.webapi.android.models.PlaylistsPager;
 import kaaes.spotify.webapi.android.models.TracksPager;
 
 import kaaes.spotify.webapi.android.models.UserPrivate;
@@ -66,7 +70,7 @@ public class MainActivity extends Activity implements
         file = new File(getFilesDir(), FILE_NAME);
 
             AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
-            builder.setScopes(new String[]{"user-read-private", "streaming"});
+            builder.setScopes(new String[]{"user-read-private", "playlist-modify-private"});
             final AuthenticationRequest request = builder.build();
             AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
 
@@ -76,8 +80,34 @@ public class MainActivity extends Activity implements
         searchButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 s = s.getSettings(file);
+
+                PlaylistController pc = new PlaylistController(s, file);
+                apiService.getMyPlaylists(new Callback<Pager<PlaylistSimple>>(){
+                    @Override
+                    public void success(Pager<PlaylistSimple> playlistSimplePager, Response response){
+                        for(int i = 0; i < playlistSimplePager.items.size(); i++) {
+                            System.out.println(playlistSimplePager.items.get(i).name + ": " + i);
+                            if (playlistSimplePager.items.get(i).name.equals(PLAYLIST_NAME)) {
+                                s.setPlaylistID(playlistSimplePager.items.get(i).id);
+                                System.out.println("GET: " + playlistSimplePager.items.get(i).id);
+                                s.saveSettings(s , file);
+                            }
+                        }
+                    }
+                    @Override
+                    public void failure(RetrofitError error){
+
+                    }
+                });
+                //pc.createPlaylist();
+                //s = s.getSettings(file);
+                //pc.getPlaylistID();
+                //pc.addToPlaylist("spotify:track:50X7TPekGLx7paJy1wQqmp");
+
+                /*
                 SearchTrackController stc = new SearchTrackController(s, file);
                 stc.SearchTrack(trackSearch.getText().toString(), artistSearch.getText().toString());
+                */
             }
         });
 
@@ -156,7 +186,6 @@ public class MainActivity extends Activity implements
                     }
                 });
             }
-
 
             apiService.getMe(new Callback<UserPrivate>(){
                 @Override
