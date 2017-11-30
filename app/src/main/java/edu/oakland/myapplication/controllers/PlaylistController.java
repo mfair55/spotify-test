@@ -35,26 +35,6 @@ public class PlaylistController {
         apiService = api.getService();
     }
 
-    public void getPlaylistID(){
-        apiService.getMyPlaylists(new Callback<Pager<PlaylistSimple>>(){
-            @Override
-            public void success(Pager<PlaylistSimple> playlistSimplePager, Response response){
-                for(int i = 0; i < playlistSimplePager.items.size(); i++) {
-                    if (playlistSimplePager.items.get(i).name.equals(PLAYLIST_NAME)) {
-                        s.setPlaylistID(playlistSimplePager.items.get(i).id);
-                        System.out.println("GET: " + playlistSimplePager.items.get(i).id);
-                        s.saveSettings(s , file);
-                    }
-                }
-            }
-            @Override
-            public void failure(RetrofitError error){
-
-            }
-        });
-
-    }
-
     public void createPlaylist(){
         if(s.getPlaylistID() == null) {
             HashMap<String, Object> playlistParams = new HashMap<String, Object>();
@@ -74,30 +54,27 @@ public class PlaylistController {
 
                 }
             });
-        }
-            System.out.println("PRINT: " + s.getPlaylistID());
+        } else
+            System.out.println("ALREADY CREATED: " + s.getPlaylistID());
     }
 
     public void addToPlaylist(String trackUri){
+            if(s.getPlaylistID() != null) {
+                HashMap parametersMap = new HashMap();
+                parametersMap.put("uris", trackUri);
+                apiService.addTracksToPlaylist(s.getUserID(), s.getPlaylistID(), parametersMap, new HashMap<String, Object>(), new Callback<Pager<PlaylistTrack>>() {
+                    @Override
+                    public void success(Pager<PlaylistTrack> playlistTrackPager, Response response) {
 
-            getPlaylistID();
-            HashMap parametersMap = new HashMap();
-            parametersMap.put("uris", trackUri);
-            apiService.addTracksToPlaylist(s.getUserID(), s.getPlaylistID(), parametersMap, new HashMap<String, Object>(), new Callback<Pager<PlaylistTrack>>() {
-                @Override
-                public void success(Pager<PlaylistTrack> playlistTrackPager, Response response) {
+                    }
 
-                }
+                    @Override
+                    public void failure(RetrofitError error) {
 
-                @Override
-                public void failure(RetrofitError error) {
-
-                }
-            });
-
-
-            //System.out.println("Playlist does not exist");
-
+                    }
+                });
+            } else
+                System.out.println("There has not been a playlist created yet.");
     }
 
 

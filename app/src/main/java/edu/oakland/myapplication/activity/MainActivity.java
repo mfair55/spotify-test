@@ -59,55 +59,30 @@ public class MainActivity extends Activity implements
     private SpotifyApi api = new SpotifyApi();
     private SpotifyService apiService = api.getService();
 
-    private Settings s;
+    private Settings s = new Settings();
     private File file;
-
+    PlaylistController pc;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
+        builder.setScopes(new String[]{"user-read-private", "playlist-modify-private"});
+        final AuthenticationRequest request = builder.build();
+        AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
         file = new File(getFilesDir(), FILE_NAME);
-
-            AuthenticationRequest.Builder builder = new AuthenticationRequest.Builder(CLIENT_ID, AuthenticationResponse.Type.TOKEN, REDIRECT_URI);
-            builder.setScopes(new String[]{"user-read-private", "playlist-modify-private"});
-            final AuthenticationRequest request = builder.build();
-            AuthenticationClient.openLoginActivity(this, REQUEST_CODE, request);
-
+        s = s.getSettings(file);
+        pc = new PlaylistController(s, file);
+        pc.createPlaylist();
         searchButton = (Button) findViewById(R.id.searchButton);
         trackSearch = (EditText) findViewById(R.id.trackSearch);
         artistSearch = (EditText) findViewById(R.id.editText2);
         searchButton.setOnClickListener(new View.OnClickListener(){
             public void onClick(View v){
                 s = s.getSettings(file);
-
-                PlaylistController pc = new PlaylistController(s, file);
-                apiService.getMyPlaylists(new Callback<Pager<PlaylistSimple>>(){
-                    @Override
-                    public void success(Pager<PlaylistSimple> playlistSimplePager, Response response){
-                        for(int i = 0; i < playlistSimplePager.items.size(); i++) {
-                            System.out.println(playlistSimplePager.items.get(i).name + ": " + i);
-                            if (playlistSimplePager.items.get(i).name.equals(PLAYLIST_NAME)) {
-                                s.setPlaylistID(playlistSimplePager.items.get(i).id);
-                                System.out.println("GET: " + playlistSimplePager.items.get(i).id);
-                                s.saveSettings(s , file);
-                            }
-                        }
-                    }
-                    @Override
-                    public void failure(RetrofitError error){
-
-                    }
-                });
-                //pc.createPlaylist();
-                //s = s.getSettings(file);
-                //pc.getPlaylistID();
-                //pc.addToPlaylist("spotify:track:50X7TPekGLx7paJy1wQqmp");
-
-                /*
                 SearchTrackController stc = new SearchTrackController(s, file);
                 stc.SearchTrack(trackSearch.getText().toString(), artistSearch.getText().toString());
-                */
+
             }
         });
 
@@ -115,13 +90,11 @@ public class MainActivity extends Activity implements
         playButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
                 s = s.getSettings(file); //Reload file in case search changed.
-
                 title = (TextView) findViewById(R.id.trackTitle);
                 title.setText(s.getTrackName());
-
                 artist = (TextView) findViewById(R.id.artistName);
                 artist.setText(s.getTrackArtist());
-
+                pc.addToPlaylist(s.getUriResult());
                 mPlayer.playUri(null, s.getUriResult(), 0, 0);
             }
         });
@@ -134,7 +107,6 @@ public class MainActivity extends Activity implements
                 }
             }
         });
-
 
         pauseButton = (Button) findViewById(R.id.pauseButton);
         pauseButton.setOnClickListener(new View.OnClickListener() {
@@ -168,7 +140,9 @@ public class MainActivity extends Activity implements
 
 
                 spotifyClientToken = response.getAccessToken();
-                s = new Settings(spotifyClientToken);
+                s.setAccessToken(spotifyClientToken);
+                s.saveSettings(s, file);
+
 
                 api.setAccessToken(spotifyClientToken);
                 Config playerConfig = new Config(this, response.getAccessToken(), CLIENT_ID);
@@ -232,7 +206,7 @@ public class MainActivity extends Activity implements
     @Override
     public void onLoggedIn() {
         Log.d("MainActivity", "User logged in");
-
+        s.setLoggedIn(true);
         //mPlayer.playUri(null, resultUri, 0, 0);
 
     }

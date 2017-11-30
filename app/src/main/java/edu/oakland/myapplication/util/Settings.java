@@ -19,7 +19,10 @@ import edu.oakland.myapplication.activity.MainActivity;
 
 public class Settings implements Serializable {
 
-    private String accessToken, userID, uriResult, trackName, trackArtist, playlistID;
+    private String accessToken, userID, uriResult, trackName, trackArtist;
+    private String playlistID = null;
+
+    private Boolean loggedIn = false;
 
 
 
@@ -30,6 +33,10 @@ public class Settings implements Serializable {
     public Settings(){
         accessToken = null;
         userID = null;
+    }
+
+    public Boolean getLoggedIn() {
+        return loggedIn;
     }
 
     public void setPlaylistID(String newID){
@@ -51,8 +58,14 @@ public class Settings implements Serializable {
     public void setTrackName(String newTrackName){
         trackName = newTrackName;
     }
+
     public void setTrackArtist(String newArtist){
         trackArtist = newArtist;
+    }
+
+    public void setLoggedIn(Boolean loggedIn) {
+        this.loggedIn = loggedIn;
+
     }
 
     public String getTrackArtist(){
@@ -91,7 +104,7 @@ public class Settings implements Serializable {
     }
 
     public Settings getSettings(File newFile){
-        Settings s = null;
+        Settings s = new Settings();
         try{
             FileInputStream inStream = new FileInputStream(newFile);
             ObjectInputStream objectInputStream = new ObjectInputStream(inStream);
